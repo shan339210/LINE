@@ -2,167 +2,244 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>野原家出遊記帳小幫手</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>野原家出遊記帳小幫手 ✈️</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap');
-    body {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      background-color: #FEF08A;
+    * {
+      box-sizing: border-box;
+      font-family: 'Zen Maru Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    .neo-card {
+
+    body {
+      background-color: #FEF08A;
+      margin: 0;
+      padding: 0;
+      color: #1E293B;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Modern Brutalism Pop Style Rules */
+    .pop-card {
+      background: #FFFFFF;
       border: 3px solid #1E293B;
       box-shadow: 4px 4px 0px #1E293B;
-      border-radius: 1rem;
+      border-radius: 1.25rem;
     }
-    .neo-btn {
+
+    .pop-btn {
+      background: #FFFFFF;
       border: 2px solid #1E293B;
       box-shadow: 3px 3px 0px #1E293B;
+      border-radius: 0.75rem;
+      font-weight: 900;
       transition: all 0.1s ease;
+      cursor: pointer;
+      user-select: none;
     }
-    .neo-btn:active {
+
+    .pop-btn:active {
       transform: translate(2px, 2px);
       box-shadow: 1px 1px 0px #1E293B;
     }
+
     .tab-btn.active {
-      background-color: #FF3B30;
-      color: white;
+      background-color: #EF4444 !important;
+      color: #FFFFFF !important;
+    }
+
+    /* Custom Form Control Styling */
+    input, select {
+      border: 2px solid #1E293B !important;
+      border-radius: 0.75rem !important;
+      outline: none !important;
+    }
+
+    input:focus, select:focus {
+      border-color: #EF4444 !important;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
     }
   </style>
 </head>
-<body class="p-3 sm:p-5 max-w-md mx-auto min-h-screen pb-12">
 
-  <!-- Header -->
-  <div class="neo-card bg-red-500 text-white p-4 mb-4 text-center relative overflow-hidden">
-    <div class="flex items-center justify-center gap-3">
-      <!-- 蠟筆小新 SVG -->
-      <svg class="w-12 h-12" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="45" fill="#FFCC00" stroke="#1E293B" stroke-width="4"/>
-        <path d="M 20 40 Q 35 20 50 40" stroke="#1E293B" stroke-width="8" fill="none" stroke-linecap="round"/>
-        <path d="M 50 40 Q 65 20 80 40" stroke="#1E293B" stroke-width="8" fill="none" stroke-linecap="round"/>
-        <circle cx="35" cy="52" r="5" fill="#1E293B"/>
-        <circle cx="65" cy="52" r="5" fill="#1E293B"/>
-        <ellipse cx="25" cy="62" rx="6" ry="4" fill="#FF8888"/>
-        <ellipse cx="75" cy="62" rx="6" ry="4" fill="#FF8888"/>
-        <path d="M 40 70 Q 50 82 60 70" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/>
-      </svg>
-      <div class="text-left">
-        <h1 class="text-xl font-black tracking-wide">野原家出遊記帳</h1>
-        <p class="text-xs bg-yellow-300 text-black px-2 py-0.5 rounded-full font-bold inline-block mt-1">動感光波分帳版 ✨</p>
+<body class="min-h-screen p-3 sm:p-5 flex justify-center items-start">
+
+  <div class="w-full max-w-md mx-auto space-y-4">
+
+    <!-- Top Header Banner with Airplane Icon -->
+    <div class="pop-card bg-red-500 text-white p-4 relative overflow-hidden">
+      <div class="flex items-center gap-3">
+        
+        <!-- Clean Vector Airplane Icon Container -->
+        <div class="w-12 h-12 bg-yellow-300 rounded-2xl border-2 border-slate-900 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg class="w-7 h-7 text-slate-900" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+          </svg>
+        </div>
+
+        <!-- Editable Trip Title -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-1.5 cursor-pointer group" onclick="editAppTitle()">
+            <h1 id="appTitleDisplay" class="text-lg font-black tracking-wide truncate border-b-2 border-dashed border-yellow-300 pb-0.5">
+              野原家出遊記帳
+            </h1>
+            <span class="text-xs bg-red-600 hover:bg-red-700 p-1 rounded-md text-white border border-red-300 flex-shrink-0">✏️</span>
+          </div>
+          <p class="text-[11px] bg-yellow-300 text-slate-900 font-bold px-2 py-0.5 rounded-md inline-block mt-1 border border-slate-900">
+            出遊好幫手 ✈️ 點擊標題可改名
+          </p>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- 分頁按鈕 -->
-  <div class="flex gap-2 mb-4">
-    <button id="tab1" onclick="switchTab(1)" class="tab-btn active flex-1 neo-btn py-2 font-bold rounded-xl bg-white text-slate-800">📝 新增記帳</button>
-    <button id="tab2" onclick="switchTab(2)" class="tab-btn flex-1 neo-btn py-2 font-bold rounded-xl bg-white text-slate-800">📋 帳目明細</button>
-    <button id="tab3" onclick="switchTab(3)" class="tab-btn flex-1 neo-btn py-2 font-bold rounded-xl bg-white text-slate-800">⚡ 快速結算</button>
-  </div>
-
-  <!-- 頁籤 1: 新增記帳 -->
-  <div id="page1" class="neo-card bg-white p-4 mb-4">
-    <h2 class="font-black text-lg mb-3 flex items-center gap-2">
-      <span>🖍️</span> 新增消費項目
-    </h2>
-
-    <div class="space-y-3 text-sm font-bold">
-      <div>
-        <label class="block text-slate-600 mb-1">消費名稱</label>
-        <input type="text" id="itemTitle" placeholder="例：巧克比餅乾、雙葉車票" class="w-full border-2 border-slate-800 rounded-lg p-2 bg-slate-50 focus:outline-none">
-      </div>
-
-      <div class="flex gap-2">
-        <div class="flex-1">
-          <label class="block text-slate-600 mb-1">金額</label>
-          <input type="number" id="itemAmount" placeholder="0" class="w-full border-2 border-slate-800 rounded-lg p-2 bg-slate-50 focus:outline-none">
-        </div>
-        <div class="w-1/3">
-          <label class="block text-slate-600 mb-1">幣別</label>
-          <select id="itemCurrency" class="w-full border-2 border-slate-800 rounded-lg p-2 bg-slate-50 focus:outline-none">
-            <option value="TWD">TWD (NT$)</option>
-            <option value="JPY">JPY (￥)</option>
-            <option value="KRW">KRW (₩)</option>
-            <option value="USD">USD ($)</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-slate-600 mb-1">類別</label>
-        <select id="itemCategory" class="w-full border-2 border-slate-800 rounded-lg p-2 bg-slate-50 focus:outline-none">
-          <option value="🍔 餐飲美食">🍔 餐飲美食</option>
-          <option value="🚌 交通車票">🚌 交通車票</option>
-          <option value="🏠 住宿飯店">🏠 住宿飯店</option>
-          <option value="🎟️ 景點門票">🎟️ 景點門票</option>
-          <option value="🛍️ 購物戰利品">🛍️ 購物戰利品</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-slate-600 mb-1">誰先付錢的？</label>
-        <select id="itemPayer" class="w-full border-2 border-slate-800 rounded-lg p-2 bg-slate-50 focus:outline-none">
-          <!-- 動態載入成員 -->
-        </select>
-      </div>
-
-      <button onclick="addExpense()" class="w-full neo-btn bg-yellow-400 font-black py-3 rounded-xl text-base mt-2">
-        ✨ 記下一筆帳！
+    <!-- Navigation Tabs -->
+    <div class="flex gap-2">
+      <button id="tab1" onclick="switchTab(1)" class="tab-btn active flex-1 pop-btn py-2.5 text-xs sm:text-sm font-black bg-white text-slate-800">
+        📝 新增記帳
+      </button>
+      <button id="tab2" onclick="switchTab(2)" class="tab-btn flex-1 pop-btn py-2.5 text-xs sm:text-sm font-black bg-white text-slate-800">
+        📋 帳目明細
+      </button>
+      <button id="tab3" onclick="switchTab(3)" class="tab-btn flex-1 pop-btn py-2.5 text-xs sm:text-sm font-black bg-white text-slate-800">
+        ⚡ 快速結算
       </button>
     </div>
-  </div>
 
-  <!-- 成員管理卡片 -->
-  <div class="neo-card bg-white p-4 mb-4">
-    <h2 class="font-black text-base mb-2 flex justify-between items-center">
-      <span>👥 出遊小夥伴</span>
-      <span id="memberCount" class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">3 人</span>
-    </h2>
-    <div id="memberList" class="flex flex-wrap gap-1.5 mb-3">
-      <!-- 動態載入成員標籤 -->
-    </div>
-    <div class="flex gap-2">
-      <input type="text" id="newMemberName" placeholder="新增人名（如：廣志）" class="flex-1 border-2 border-slate-800 rounded-lg p-1.5 text-sm bg-slate-50">
-      <button onclick="addMember()" class="neo-btn bg-sky-300 font-bold px-3 py-1.5 rounded-lg text-sm">新增</button>
-    </div>
-  </div>
+    <!-- TAB 1: ADD EXPENSE FORM -->
+    <div id="page1" class="pop-card p-4 space-y-4">
+      <h2 class="font-black text-base flex items-center gap-2 text-slate-800">
+        <span>🖍️</span> 新增消費項目
+      </h2>
 
-  <!-- 頁籤 2: 明細 -->
-  <div id="page2" class="neo-card bg-white p-4 mb-4 hidden">
-    <h2 class="font-black text-lg mb-3">📋 消費明細記錄</h2>
-    <div id="expenseList" class="space-y-2">
-      <!-- 動態載入明細 -->
-    </div>
-  </div>
+      <div class="space-y-3 text-xs font-bold">
+        <div>
+          <label class="block text-slate-600 mb-1">消費名稱</label>
+          <input type="text" id="itemTitle" placeholder="例：機票、飯店、巧克比餅乾" class="w-full p-2.5 bg-slate-50 text-sm font-black text-slate-800">
+        </div>
 
-  <!-- 頁籤 3: 結算 -->
-  <div id="page3" class="neo-card bg-white p-4 mb-4 hidden">
-    <h2 class="font-black text-lg mb-3">⚡ 智能分帳結算</h2>
-    <div id="settlementList" class="space-y-2 mb-4">
-      <!-- 動態載入結算 -->
+        <div class="grid grid-cols-3 gap-2">
+          <div class="col-span-2">
+            <label class="block text-slate-600 mb-1">金額</label>
+            <input type="number" id="itemAmount" placeholder="0" class="w-full p-2.5 bg-slate-50 text-sm font-black text-slate-800">
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1">幣別</label>
+            <select id="itemCurrency" class="w-full p-2.5 bg-slate-50 text-xs font-black text-slate-800">
+              <option value="TWD">TWD (NT$)</option>
+              <option value="JPY">JPY (￥)</option>
+              <option value="KRW">KRW (₩)</option>
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-600 mb-1">消費類別</label>
+          <select id="itemCategory" class="w-full p-2.5 bg-slate-50 text-xs font-black text-slate-800">
+            <option value="✈️ 機票交通">✈️ 機票交通</option>
+            <option value="🍔 餐飲美食">🍔 餐飲美食</option>
+            <option value="🏠 住宿飯店">🏠 住宿飯店</option>
+            <option value="🎟️ 景點門票">🎟️ 景點門票</option>
+            <option value="🛍️ 購物戰利品">🛍️ 購物戰利品</option>
+            <option value="💡 其他雜項">💡 其他雜項</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-600 mb-1">誰先代墊的？</label>
+          <select id="itemPayer" class="w-full p-2.5 bg-slate-50 text-xs font-black text-slate-800">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <button onclick="addExpense()" class="w-full pop-btn bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-black py-3 text-sm mt-2 border-2 border-slate-900">
+          ✨ 記下一筆帳！
+        </button>
+      </div>
     </div>
-    <button onclick="copySettlement()" class="w-full neo-btn bg-green-400 font-black py-3 rounded-xl text-sm">
-      📲 複製結算文字（傳到 LINE 群組）
-    </button>
+
+    <!-- MEMBER MANAGEMENT CARD -->
+    <div class="pop-card p-4 space-y-3">
+      <div class="flex justify-between items-center">
+        <h2 class="font-black text-sm text-slate-800 flex items-center gap-1.5">
+          <span>👥</span> 出遊夥伴成員
+        </h2>
+        <span id="memberCount" class="text-xs font-black bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full border border-blue-300">0 人</span>
+      </div>
+
+      <div id="memberList" class="flex flex-wrap gap-1.5">
+        <!-- Dynamically populated member badges -->
+      </div>
+
+      <div class="flex gap-2 pt-1">
+        <input type="text" id="newMemberName" placeholder="新增夥伴（例：小新）" class="flex-1 p-2 text-xs font-black bg-slate-50">
+        <button onclick="addMember()" class="pop-btn bg-sky-300 hover:bg-sky-200 text-slate-900 px-4 py-1.5 text-xs font-black">
+          + 新增
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 2: EXPENSES LIST -->
+    <div id="page2" class="pop-card p-4 hidden space-y-3">
+      <h2 class="font-black text-sm text-slate-800 flex items-center gap-1.5">
+        <span>📋</span> 消費明細記錄
+      </h2>
+      <div id="expenseList" class="space-y-2">
+        <!-- Dynamically populated expense list -->
+      </div>
+    </div>
+
+    <!-- TAB 3: SETTLEMENT -->
+    <div id="page3" class="pop-card p-4 hidden space-y-3">
+      <h2 class="font-black text-sm text-slate-800 flex items-center gap-1.5">
+        <span>⚡</span> 智能分帳結算
+      </h2>
+      <div id="settlementList" class="space-y-2">
+        <!-- Dynamically populated settlement data -->
+      </div>
+      <button onclick="copySettlement()" class="w-full pop-btn bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-black py-3 text-xs sm:text-sm mt-2 flex items-center justify-center gap-1.5">
+        <span>📲</span> 複製結算報告（貼到 LINE 聊天室）
+      </button>
+    </div>
+
   </div>
 
   <script>
-    // 匯率換算表 (相對於 TWD)
-    const RATES = { TWD: 1, JPY: 0.21, KRW: 0.024, USD: 32.2 };
+    // Currency Exchange Rates (Base Currency: TWD)
+    const RATES = { TWD: 1, JPY: 0.21, KRW: 0.024, USD: 32.2, EUR: 35.0 };
     
-    // 初始化預設資料
-    let members = JSON.parse(localStorage.getItem('shin_members')) || ['小新', '美冴', '廣志'];
+    // Application State Variables
+    let appTitle = localStorage.getItem('shin_title') || '野原家出遊記帳';
+    let members = JSON.parse(localStorage.getItem('shin_members')) || ['野原小新', '野原美冴', '野原廣志'];
     let expenses = JSON.parse(localStorage.getItem('shin_expenses')) || [];
 
-    // 初始化 App
+    // Initialize Application
     function init() {
+      document.getElementById('appTitleDisplay').innerText = appTitle;
       renderMembers();
       renderExpenses();
       renderSettlement();
     }
 
-    // 切換頁籤
+    // Editable Trip Title Function
+    function editAppTitle() {
+      const newTitle = prompt('請輸入這趟行程的名稱：', appTitle);
+      if (newTitle !== null && newTitle.trim() !== '') {
+        appTitle = newTitle.trim();
+        document.getElementById('appTitleDisplay').innerText = appTitle;
+        localStorage.setItem('shin_title', appTitle);
+        document.title = appTitle;
+      }
+    }
+
+    // Switch Navigation Tabs
     function switchTab(num) {
       [1, 2, 3].forEach(n => {
         document.getElementById(`page${n}`).classList.add('hidden');
@@ -172,24 +249,25 @@
       document.getElementById(`tab${num}`).classList.add('active');
     }
 
-    // 渲染成員
+    // Render Member Badges and Dropdown
     function renderMembers() {
       const listEl = document.getElementById('memberList');
       const selectEl = document.getElementById('itemPayer');
       const countEl = document.getElementById('memberCount');
       
       countEl.innerText = `${members.length} 人`;
+      
       listEl.innerHTML = members.map((m, idx) => `
-        <span class="bg-yellow-100 border border-slate-800 text-slate-800 font-bold text-xs px-2 py-1 rounded-md flex items-center gap-1">
+        <span class="bg-yellow-100 border-2 border-slate-900 text-slate-800 font-black text-xs px-2.5 py-1 rounded-xl flex items-center gap-1.5 shadow-sm">
           ${m}
-          ${members.length > 1 ? `<button onclick="removeMember(${idx})" class="text-red-500 font-bold ml-1">✕</button>` : ''}
+          ${members.length > 1 ? `<button onclick="removeMember(${idx})" class="text-red-500 font-bold ml-1 hover:text-red-700">✕</button>` : ''}
         </span>
       `).join('');
 
       selectEl.innerHTML = members.map(m => `<option value="${m}">${m}</option>`).join('');
     }
 
-    // 新增成員
+    // Add New Member
     function addMember() {
       const input = document.getElementById('newMemberName');
       const name = input.value.trim();
@@ -202,15 +280,19 @@
       }
     }
 
-    // 刪除成員
+    // Remove Member
     function removeMember(idx) {
+      if (members.length <= 1) {
+        alert('行程中至少需要有一位成員唷！');
+        return;
+      }
       members.splice(idx, 1);
       saveData();
       renderMembers();
       renderSettlement();
     }
 
-    // 新增記帳
+    // Add Expense Entry
     function addExpense() {
       const title = document.getElementById('itemTitle').value.trim();
       const amount = parseFloat(document.getElementById('itemAmount').value);
@@ -219,7 +301,7 @@
       const payer = document.getElementById('itemPayer').value;
 
       if (!title || isNaN(amount) || amount <= 0) {
-        alert('請輸入有效的消費名稱與金額！');
+        alert('請填寫有效的消費名稱與金額！');
         return;
       }
 
@@ -230,22 +312,22 @@
         currency,
         category,
         payer,
-        amountTWD: Math.round(amount * RATES[currency])
+        amountTWD: Math.round(amount * (RATES[currency] || 1))
       };
 
       expenses.unshift(newExpense);
       saveData();
       
-      // 清空輸入框
+      // Reset inputs
       document.getElementById('itemTitle').value = '';
       document.getElementById('itemAmount').value = '';
 
       renderExpenses();
       renderSettlement();
-      alert('✅ 記帳成功！動感光波逼逼逼～');
+      alert('✅ 記帳成功！數據已自動更新～');
     }
 
-    // 刪除記帳
+    // Delete Expense Entry
     function deleteExpense(id) {
       expenses = expenses.filter(e => e.id !== id);
       saveData();
@@ -253,53 +335,62 @@
       renderSettlement();
     }
 
-    // 渲染帳目明細
+    // Render Expense Items
     function renderExpenses() {
       const listEl = document.getElementById('expenseList');
       if (expenses.length === 0) {
-        listEl.innerHTML = `<p class="text-center text-slate-400 py-6 text-sm font-bold">目前還沒有記帳紀錄喔！</p>`;
+        listEl.innerHTML = `
+          <div class="text-center text-slate-400 py-8 space-y-2 border-2 border-dashed border-slate-300 rounded-xl">
+            <div class="text-3xl">✈️</div>
+            <p class="text-xs font-black">目前還沒有出遊花費紀錄唷！</p>
+          </div>`;
         return;
       }
 
       listEl.innerHTML = expenses.map(e => `
-        <div class="border-2 border-slate-800 rounded-xl p-3 bg-slate-50 flex justify-between items-center">
-          <div>
-            <div class="font-black text-sm text-slate-800">${e.category.split(' ')[0]} ${e.title}</div>
-            <div class="text-xs text-slate-500 font-bold">${e.payer} 付款 • ${e.currency} ${e.amount}</div>
-          </div>
-          <div class="text-right flex items-center gap-2">
-            <div>
-              <div class="font-black text-red-500 text-sm">NT$ ${e.amountTWD}</div>
+        <div class="border-2 border-slate-900 rounded-xl p-3 bg-slate-50 flex justify-between items-center shadow-sm">
+          <div class="min-w-0 flex-1 pr-2">
+            <div class="font-black text-xs text-slate-900 truncate">${e.category.split(' ')[0]} ${e.title}</div>
+            <div class="text-[11px] text-slate-500 font-bold mt-0.5">
+              ${e.payer} 先付 • ${e.currency} ${e.amount}
             </div>
-            <button onclick="deleteExpense(${e.id})" class="text-slate-400 hover:text-red-500 font-bold px-1">✕</button>
+          </div>
+          <div class="text-right flex items-center gap-2 flex-shrink-0">
+            <div>
+              <div class="font-black text-red-500 text-xs sm:text-sm">NT$ ${e.amountTWD}</div>
+            </div>
+            <button onclick="deleteExpense(${e.id})" class="text-slate-400 hover:text-red-500 font-black px-1.5 py-1 text-xs">✕</button>
           </div>
         </div>
       `).join('');
     }
 
-    // 計算並渲染分帳結算
+    // Render Optimized Settlement Strategy
     function renderSettlement() {
       const listEl = document.getElementById('settlementList');
       if (expenses.length === 0 || members.length === 0) {
-        listEl.innerHTML = `<p class="text-center text-slate-400 py-6 text-sm font-bold">新增記帳後會自動計算結算！</p>`;
+        listEl.innerHTML = `
+          <div class="text-center text-slate-400 py-8 border-2 border-dashed border-slate-300 rounded-xl">
+            <p class="text-xs font-black">新增記帳後會自動生成最佳分帳方案！</p>
+          </div>`;
         return;
       }
 
       const totalTWD = expenses.reduce((sum, e) => sum + e.amountTWD, 0);
       const avgTWD = Math.round(totalTWD / members.length);
 
-      // 計算每個人付出金額
+      // Total Paid per Member
       let paid = {};
       members.forEach(m => paid[m] = 0);
       expenses.forEach(e => {
         if (paid[e.payer] !== undefined) paid[e.payer] += e.amountTWD;
       });
 
-      // 計算收支平衡
+      // Net Balance per Member
       let balances = {};
       members.forEach(m => balances[m] = paid[m] - avgTWD);
 
-      // 拆分債權與債務
+      // Separate Debtors and Creditors
       let debtors = [], creditors = [];
       for (let m in balances) {
         if (balances[m] < -1) debtors.push({ name: m, amount: -balances[m] });
@@ -325,19 +416,25 @@
       }
 
       let html = `
-        <div class="bg-yellow-100 border-2 border-slate-800 rounded-xl p-3 mb-3 text-sm font-bold">
-          <div>總消費：<span class="text-red-500 font-black">NT$ ${totalTWD}</span></div>
-          <div>每人平均：<span class="text-blue-600 font-black">NT$ ${avgTWD}</span></div>
+        <div class="bg-yellow-100 border-2 border-slate-900 rounded-xl p-3 text-xs font-black space-y-1">
+          <div class="flex justify-between">
+            <span>總出遊花費：</span>
+            <span class="text-red-500 font-black">NT$ ${totalTWD}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>每人平攤：</span>
+            <span class="text-blue-600 font-black">NT$ ${avgTWD}</span>
+          </div>
         </div>
       `;
 
       if (transactions.length === 0) {
-        html += `<p class="text-center text-green-600 font-bold py-2">大家金額剛剛好，不需要給錢！</p>`;
+        html += `<p class="text-center text-emerald-600 font-black py-3 text-xs">🎉 大家帳目完全平衡，不需要轉帳囉！</p>`;
       } else {
         html += transactions.map(t => `
-          <div class="border-2 border-slate-800 rounded-xl p-2.5 bg-slate-50 text-sm font-bold flex justify-between items-center">
-            <span>🔴 ${t.from} ➔ 🟢 ${t.to}</span>
-            <span class="text-red-500 font-black">NT$ ${t.amount}</span>
+          <div class="border-2 border-slate-900 rounded-xl p-3 bg-slate-50 text-xs font-black flex justify-between items-center shadow-sm">
+            <span class="text-slate-800">🔴 ${t.from} ➔ 🟢 ${t.to}</span>
+            <span class="text-red-500 font-black text-sm">NT$ ${t.amount}</span>
           </div>
         `).join('');
       }
@@ -345,40 +442,47 @@
       listEl.innerHTML = html;
     }
 
-    // 複製結算報告
+    // Copy Text Summary for LINE
     function copySettlement() {
       const totalTWD = expenses.reduce((sum, e) => sum + e.amountTWD, 0);
       const avgTWD = Math.round(totalTWD / (members.length || 1));
 
-      let text = `🖍️ 【野原家出遊分帳報告】\n`;
+      let text = `✈️【${appTitle} 出遊分帳報告】\n`;
       text += `💰 總消費：NT$ ${totalTWD}\n`;
       text += `👥 每人平均：NT$ ${avgTWD}\n`;
       text += `-------------------\n`;
-      text += `⚡ 結算建議：\n`;
+      text += `⚡ 建議劃算方案：\n`;
 
       const listItems = document.querySelectorAll('#settlementList div.bg-slate-50');
       if (listItems.length === 0) {
-        text += `大家都結清囉！金額剛剛好！\n`;
+        text += `大家的帳目完美結清囉！\n`;
       } else {
         listItems.forEach(item => {
           text += `${item.innerText.replace('\n', ' ')}\n`;
         });
       }
 
-      navigator.clipboard.writeText(text).then(() => {
-        alert('📋 結算報告已複製到剪貼簿！可直接貼到 LINE 群組！');
-      }).catch(() => {
-        alert('複製失敗，請手動選取文字複製。');
-      });
+      // Clipboard Fallback Strategy
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        alert('📋 結算報告已複製到剪貼簿！請直接開啟 LINE 貼上即可！\n\n' + text);
+      } catch (err) {
+        alert('複製失敗，請手動複製文字');
+      }
+      document.body.removeChild(textarea);
     }
 
-    // 儲存資料到 LocalStorage
+    // Save Data to LocalStorage
     function saveData() {
       localStorage.setItem('shin_members', JSON.stringify(members));
       localStorage.setItem('shin_expenses', JSON.stringify(expenses));
     }
 
-    // 頁面載入執行
+    // Trigger Initialization on Window Load
     window.onload = init;
   </script>
 </body>
