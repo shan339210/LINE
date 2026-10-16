@@ -1,1210 +1,385 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>蠟筆小新野原家出遊記帳小幫手 🖍️</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Comic / Round fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- LINE LIFF SDK v2 -->
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        line: '#06C755',
-                        shinRed: '#FF3B30',      /* 小新經典紅衣 */
-                        shinYellow: '#FFCC00',   /* 小新經典黃褲 */
-                        shinBlue: '#3A86FF',     /* 雙葉幼稚園天藍 */
-                        shinGreen: '#2EC4B6',    /* 巧克比鱷魚綠 */
-                        shinPink: '#FF007F',     /* 巧克比盒身粉紅 */
-                        shinPurple: '#7209B7',   /* 動感超人紫 */
-                        shinBg: '#FFF9E6',       /* 溫暖鵝黃底色 */
-                        shinDark: '#2B2D42'      /* 粗線條深色 */
-                    },
-                    fontFamily: {
-                        sans: ['Zen Maru Gothic', 'Noto Sans TC', 'sans-serif']
-                    },
-                    boxShadow: {
-                        'shin-pop': '4px 4px 0px #2B2D42',
-                        'shin-btn': '0px 6px 0px #C72C21',
-                        'shin-btn-active': '0px 2px 0px #C72C21'
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <style>
-        body {
-            font-family: 'Zen Maru Gothic', 'Noto Sans TC', -apple-system, sans-serif;
-            background: #FFD166;
-            background-image: radial-gradient(#FF9F1C 15%, transparent 16%), radial-gradient(#FF3B30 15%, transparent 16%);
-            background-size: 60px 60px;
-            background-position: 0 0, 30px 30px;
-            -webkit-tap-highlight-color: transparent;
-            color: #2B2D42;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .safe-area-bottom {
-            padding-bottom: env(safe-area-inset-bottom, 20px);
-        }
-
-        /* Shin-chan Wiggle Animation */
-        @keyframes shinWiggle {
-            0%, 100% { transform: rotate(-3deg) translateY(0px); }
-            50% { transform: rotate(3deg) translateY(-5px); }
-        }
-        .animate-shin-wiggle {
-            animation: shinWiggle 2.2s ease-in-out infinite;
-        }
-
-        @keyframes actionBeam {
-            0%, 100% { opacity: 0.4; transform: scale(0.95); }
-            50% { opacity: 1; transform: scale(1.1); filter: drop-shadow(0 0 8px #FFCC00); }
-        }
-        .animate-action-beam {
-            animation: actionBeam 1.5s ease-in-out infinite;
-        }
-
-        .shin-card {
-            background: #FFFFFF;
-            border: 3px solid #2B2D42;
-            box-shadow: 5px 5px 0px #2B2D42;
-            border-radius: 1.25rem;
-        }
-
-        .shin-badge {
-            background: #FFCC00;
-            color: #2B2D42;
-            border: 2px solid #2B2D42;
-        }
-    </style>
-</head>
-<body class="antialiased min-h-screen flex justify-center items-center p-0 sm:p-4">
-
-<!-- Floating Action Kamen Beams in Background -->
-<div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-    <div class="absolute w-8 h-8 text-shinRed left-6 top-10 animate-action-beam" style="animation-delay: 0.1s;">⚡</div>
-    <div class="absolute w-6 h-6 text-shinBlue right-8 top-24 animate-action-beam" style="animation-delay: 0.6s;">🌟</div>
-    <div class="absolute w-10 h-10 text-shinGreen left-1/4 top-1/3 animate-action-beam" style="animation-delay: 1.2s;">🐊</div>
-    <div class="absolute w-8 h-8 text-shinPink right-1/4 bottom-1/3 animate-action-beam" style="animation-delay: 0.4s;">🍪</div>
-    <div class="absolute w-6 h-6 text-shinPurple left-10 bottom-20 animate-action-beam" style="animation-delay: 1.5s;">💥</div>
-</div>
-
-<div x-data="shinTravelApp()" x-init="initApp()" class="w-full max-w-md min-h-screen sm:min-h-[844px] bg-shinBg sm:rounded-3xl shadow-2xl flex flex-col relative overflow-hidden z-10 pb-20 border-0 sm:border-4 border-[#2B2D42]">
-    
-    <!-- Top Shin-chan Header -->
-    <header class="bg-shinRed text-white p-4 sticky top-0 z-30 shadow-md border-b-4 border-[#2B2D42]">
-        <div class="flex justify-between items-center">
-            
-            <!-- Shin-chan Mascot Header -->
-            <div class="flex items-center gap-2.5">
-                <div class="relative w-14 h-14 flex items-center justify-center animate-shin-wiggle drop-shadow-md">
-                    <!-- Detailed Crayon Shin-chan Face & Body SVG -->
-                    <svg class="w-14 h-14" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Red Shirt & Yellow Shorts Silhouette Body -->
-                        <path d="M 30 75 Q 30 60 60 60 Q 90 60 90 75 L 85 95 L 35 95 Z" fill="#FF3B30" stroke="#2B2D42" stroke-width="3" />
-                        <!-- Yellow Shorts -->
-                        <path d="M 35 90 L 85 90 L 82 108 L 38 108 Z" fill="#FFCC00" stroke="#2B2D42" stroke-width="3" />
-                        
-                        <!-- Crayon Shin-chan Head Oval (Chubby Cheek Profile) -->
-                        <!-- Right Chubby Cheek Bumper -->
-                        <path d="M 35 30 C 35 15, 85 15, 85 30 C 85 45, 95 48, 88 62 C 80 75, 40 75, 32 60 C 26 48, 35 38, 35 30 Z" fill="#FFDAC1" stroke="#2B2D42" stroke-width="3.5" />
-
-                        <!-- Shin-chan Iconic Thick Eyebrows -->
-                        <path d="M 38 32 C 45 25, 52 26, 56 30" stroke="#2B2D42" stroke-width="5" stroke-linecap="round" fill="none" />
-                        <path d="M 66 30 C 72 26, 80 25, 86 32" stroke="#2B2D42" stroke-width="5" stroke-linecap="round" fill="none" />
-
-                        <!-- Big Shiny Eyes -->
-                        <!-- Left Eye -->
-                        <ellipse cx="48" cy="38" rx="5" ry="6" fill="#2B2D42" />
-                        <circle cx="46.5" cy="36" r="2" fill="#FFFFFF" />
-                        <!-- Right Eye -->
-                        <ellipse cx="75" cy="38" rx="5" ry="6" fill="#2B2D42" />
-                        <circle cx="73.5" cy="36" r="2" fill="#FFFFFF" />
-
-                        <!-- Cute Cheek Blush Circles -->
-                        <ellipse cx="38" cy="48" rx="6" ry="4" fill="#FF8FA3" opacity="0.85" />
-                        <ellipse cx="84" cy="48" rx="6" ry="4" fill="#FF8FA3" opacity="0.85" />
-
-                        <!-- Open Mischievous Mouth -->
-                        <path d="M 54 48 Q 61 58 68 48 Z" fill="#FF3B30" stroke="#2B2D42" stroke-width="2.5" />
-                        <path d="M 57 52 Q 61 50 65 52" stroke="#FFD166" stroke-width="1.5" fill="none" />
-
-                        <!-- Cute ears -->
-                        <ellipse cx="28" cy="42" rx="4" ry="5" fill="#FFDAC1" stroke="#2B2D42" stroke-width="2.5" />
-                        <ellipse cx="92" cy="42" rx="4" ry="5" fill="#FFDAC1" stroke="#2B2D42" stroke-width="2.5" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="flex items-center gap-1">
-                        <span class="bg-shinYellow text-[#2B2D42] font-black text-[10px] px-2 py-0.5 rounded-md border border-[#2B2D42] tracking-wider uppercase">Crayon Shin-chan</span>
-                        <span class="text-[10px] text-yellow-200 font-bold tracking-widest">野原家出遊記</span>
-                    </div>
-                    <h1 class="font-black text-base text-white tracking-wide mt-0.5 drop-shadow" x-text="tripInfo.name || '野原家旅遊記帳本'"></h1>
-                </div>
-            </div>
-            
-            <!-- Quick Settings Button -->
-            <button @click="showSettings = true" class="w-9 h-9 bg-shinYellow text-[#2B2D42] rounded-xl border-2 border-[#2B2D42] flex items-center justify-center font-black shadow-shin-pop active:translate-x-0.5 active:translate-y-0.5 transition">
-                <i class="fa-solid fa-gear text-sm"></i>
-            </button>
-        </div>
-        
-        <!-- Shin-chan Daily Quote Banner -->
-        <div class="mt-2.5 bg-white text-[#2B2D42] px-3 py-2 rounded-xl border-2 border-[#2B2D42] flex justify-between items-center text-xs shadow-sm">
-            <div class="flex items-center gap-1.5 truncate pr-2">
-                <span class="text-base">🖍️</span>
-                <span class="text-[11px] font-bold truncate" x-text="currentShinQuote"></span>
-            </div>
-            <div class="font-black text-xs whitespace-nowrap bg-shinYellow px-2 py-0.5 rounded-md border border-[#2B2D42]">
-                總支出 <span x-text="formatCurrency(calculateTotalExpenses(), tripInfo.baseCurrency)"></span>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 p-4 overflow-y-auto space-y-4">
-        
-        <!-- TAB 1: EXPENSES LIST -->
-        <div x-show="currentTab === 'expenses'" class="space-y-4" x-transition.opacity>
-            
-            <!-- Quick Mode Switch Banner -->
-            <div class="bg-[#2B2D42] text-white p-3 rounded-2xl shadow-sm border-2 border-[#2B2D42] flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <span class="text-base" x-text="useGroupSplit ? '👨‍👩‍👧‍👦' : '🧍‍♂️'"></span>
-                    <div>
-                        <div class="font-black text-xs text-shinYellow" x-text="useGroupSplit ? '野原家多人分帳模式' : '小新個人專屬記帳模式'"></div>
-                        <div class="text-[10px] text-gray-300 font-bold" x-text="useGroupSplit ? '自動計算大家誰該給誰錢' : '個人獨旅記帳，清楚掌握每一筆預算'"></div>
-                    </div>
-                </div>
-                <button @click="toggleMode()" class="bg-shinYellow text-[#2B2D42] font-black text-[11px] px-3 py-1.5 rounded-xl border border-[#2B2D42] shadow-sm active:scale-95 transition">
-                    切換模式 🔄
-                </button>
-            </div>
-
-            <!-- Action Kamen Add Button -->
-            <button @click="openExpenseModal()" class="w-full bg-shinYellow hover:bg-amber-300 text-[#2B2D42] font-black py-3 px-4 rounded-2xl shadow-shin-pop active:translate-x-1 active:translate-y-1 transition-all flex items-center justify-center gap-2 text-base border-3 border-[#2B2D42]">
-                <i class="fa-solid fa-bolt text-shinRed text-xl"></i> 動感光波！新增一筆花費 💥
-            </button>
-        <!-- TAB 2: SETTLEMENT / ANALYSIS -->
-        <div x-show="currentTab === 'settle'" class="space-y-4" x-transition.opacity>
-            
-            <!-- Dynamic Banner for Personal vs Group Mode -->
-            <div class="bg-shinPurple text-white p-4 rounded-2xl shadow-shin-pop relative overflow-hidden border-3 border-[#2B2D42]">
-                <div class="absolute -right-2 -bottom-2 opacity-20 text-6xl select-none">💥</div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xl" x-text="useGroupSplit ? '⚡' : '📊'"></span>
-                    <h2 class="text-sm font-black tracking-wide text-shinYellow uppercase" x-text="useGroupSplit ? '動感超人最佳化分帳結算' : '小新個人出遊消費統計表'"></h2>
-                </div>
-                <p class="text-xs text-purple-100 mt-1 font-bold" x-text="useGroupSplit ? '美冴不用算帳算出偏頭痛！系統自動歸納最少筆數轉帳方案！' : '個人花費分析，一眼看出巧克比佔了多少預算！'"></p>
-                <div class="mt-3 pt-2.5 border-t border-white/20 flex justify-between items-center">
-                    <span class="text-xs text-purple-200 font-bold" x-text="useGroupSplit ? '最佳化交易:' : '預算評估:'"></span>
-                    <span class="font-black text-base text-shinYellow" x-text="useGroupSplit ? (settlementPlan.length + ' 筆轉帳') : ('總計 ' + formatCurrency(calculateTotalExpenses(), tripInfo.baseCurrency))"></span>
-                </div>
-            </div>
-
-            <!-- Personal Analytics View (Only in Solo Mode) -->
-            <template x-if="!useGroupSplit">
-                <div class="space-y-3">
-                    <div class="shin-card p-4 space-y-3">
-                        <h3 class="font-black text-xs text-[#2B2D42] uppercase tracking-wider flex items-center gap-1.5">
-                            <span>🍪</span> 各類別花費比例分析
-                        </h3>
-                        <div class="space-y-2">
-                            <template x-for="cat in getCategoryAnalytics()" :key="cat.id">
-                                <div x-show="cat.amount > 0" class="space-y-1">
-                                    <div class="flex justify-between items-center text-xs">
-                                        <span class="font-black text-[#2B2D42] flex items-center gap-1">
-                                            <span x-text="cat.icon"></span>
-                                            <span x-text="cat.name"></span>
-                                        </span>
-                                        <span class="font-black text-shinRed">
-                                            <span x-text="formatCurrency(cat.amount, tripInfo.baseCurrency)"></span>
-                                            (<span x-text="cat.percentage"></span>%)
-                                        </span>
-                                    </div>
-                                    <div class="w-full bg-gray-100 rounded-full h-3 border border-[#2B2D42] overflow-hidden">
-                                        <div class="bg-shinYellow h-full border-r border-[#2B2D42] transition-all duration-500" :style="`width: ${cat.percentage}%`"></div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </template>
-
-            <!-- Group Settlement View (Only in Group Split Mode) -->
-            <template x-if="useGroupSplit">
-                <div class="space-y-4">
-                    <!-- Share to LINE Button -->
-                    <button @click="shareToLine()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-black py-3.5 px-4 rounded-2xl shadow-shin-pop flex items-center justify-center gap-2 transition active:translate-x-1 active:translate-y-1 text-sm border-3 border-[#2B2D42]">
-                        <i class="fa-brands fa-line text-2xl"></i> 分享結算卡片到 LINE 聊天室 💬
-                    </button>
-
-                    <!-- Settlement Transfer Cards -->
-                    <div class="space-y-3">
-                        <h3 class="font-black text-sm text-[#2B2D42] flex items-center gap-2 px-1">
-                            <span>💸</span> 應轉帳結算清單
-                        </h3>
-
-                        <template x-if="settlementPlan.length === 0">
-                            <div class="shin-card p-8 text-center space-y-2 border-2 border-dashed border-[#2B2D42]">
-                                <div class="text-4xl">🎉</div>
-                                <p class="font-black text-[#2B2D42] text-sm">大家的帳目完美歸零！</p>
-                                <p class="text-xs text-gray-500 font-bold">太棒了～不用像野原廣志一樣還 32 年房貸囉！</p>
-                            </div>
-                        </template>
-
-                        <template x-for="(plan, idx) in settlementPlan" :key="idx">
-                            <div class="shin-card p-3.5 flex items-center justify-between">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="text-center">
-                                        <div class="w-10 h-10 rounded-xl bg-shinRed text-white font-black flex items-center justify-center text-sm border-2 border-[#2B2D42] shadow-sm" x-text="getMemberName(plan.from)[0]"></div>
-                                        <span class="text-[11px] font-black text-[#2B2D42] mt-1 block" x-text="getMemberName(plan.from)"></span>
-                                    </div>
-                                    <div class="flex flex-col items-center">
-                                        <span class="text-[10px] text-shinPurple font-black">轉給</span>
-                                        <i class="fa-solid fa-right-long text-shinPurple text-base animate-pulse"></i>
-                                    </div>
-                                    <div class="text-center">
-                                        <div class="w-10 h-10 rounded-xl bg-shinGreen text-white font-black flex items-center justify-center text-sm border-2 border-[#2B2D42] shadow-sm" x-text="getMemberName(plan.to)[0]"></div>
-                                        <span class="text-[11px] font-black text-[#2B2D42] mt-1 block" x-text="getMemberName(plan.to)"></span>
-                                    </div>
-                                </div>
-
-                                <div class="text-right">
-                                    <div class="text-[10px] text-gray-500 font-bold">需支付金額</div>
-                                    <div class="font-black text-base text-shinRed" x-text="formatCurrency(plan.amount, tripInfo.baseCurrency)"></div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Member Balances Overview -->
-                    <div class="shin-card p-4 space-y-3">
-                        <h3 class="font-black text-xs text-[#2B2D42] uppercase tracking-wider flex items-center gap-1">
-                            <i class="fa-solid fa-chart-pie"></i> 野原家成員個人收支總覽
-                        </h3>
-                        <div class="space-y-2">
-                            <template x-for="m in memberBalances" :key="m.id">
-                                <div class="flex justify-between items-center text-xs bg-amber-50 p-2.5 rounded-xl border-2 border-[#2B2D42]">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-2.5 h-2.5 rounded-full border border-[#2B2D42]" :class="m.balance >= 0 ? 'bg-shinGreen' : 'bg-shinRed'"></span>
-                                        <span class="font-black text-[#2B2D42]" x-text="m.name"></span>
-                                        <span x-show="m.isLineUser" class="bg-emerald-100 text-emerald-800 text-[9px] px-1.5 py-0.2 rounded-md font-black border border-emerald-400">LINE</span>
-                                    </div>
-                                    <div class="font-black" :class="m.balance >= 0 ? 'text-emerald-700' : 'text-shinRed'">
-                                        <span x-text="m.balance >= 0 ? '應收 +' : '應付 '"></span>
-                                        <span x-text="formatCurrency(Math.abs(m.balance), tripInfo.baseCurrency)"></span>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </div>
-                    <div>
-                        <div class="font-black text-xs text-[#2B2D42]">小白提示 🐶</div>
-                        <div class="text-[10px] text-gray-700 font-bold">記得把每一筆巧克比跟玩偶費用記下來唷！</div>
-                    </div>
-                </div>
-                <span class="bg-shinPink text-white font-black text-[10px] px-2 py-1 rounded-md border border-[#2B2D42]">巧克比 🍪</span>
-            </div>
-
-            <!-- Category Filter Pills -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar py-1">
-                <button @click="selectedCategoryFilter = 'ALL'" 
-                        :class="selectedCategoryFilter === 'ALL' ? 'bg-[#2B2D42] text-shinYellow font-black' : 'bg-white text-gray-700 border-2 border-[#2B2D42] font-bold'"
-                        class="px-3.5 py-1.5 rounded-xl text-xs whitespace-nowrap transition flex items-center gap-1 shadow-sm">
-                    <span>🖍️ 全部項目</span>
-                </button>
-                <template x-for="cat in categories" :key="cat.id">
-                    <button @click="selectedCategoryFilter = cat.id"
-                            :class="selectedCategoryFilter === cat.id ? 'bg-[#2B2D42] text-shinYellow font-black' : 'bg-white text-gray-700 border-2 border-[#2B2D42] font-bold'"
-                            class="px-3.5 py-1.5 rounded-xl text-xs whitespace-nowrap flex items-center gap-1.5 transition shadow-sm">
-                        <span x-text="cat.icon"></span>
-                        <span x-text="cat.name"></span>
-                    </button>
-                </template>
-            </div>
-
-            <!-- Expense List -->
-            <div class="space-y-3">
-                <template x-if="filteredExpenses().length === 0">
-                    <div class="shin-card p-8 text-center space-y-3 my-4 border-2 border-dashed border-[#2B2D42]">
-                        <div class="w-16 h-16 bg-amber-100 text-shinRed rounded-2xl border-2 border-[#2B2D42] flex items-center justify-center mx-auto text-3xl animate-bounce">
-                            🖍️
-                        </div>
-                        <p class="font-black text-[#2B2D42] text-sm">還沒有野原家的帳目唷！</p>
-                        <p class="text-xs text-gray-500 font-bold">點擊上方「動感光波」按鈕開始記帳吧 💥</p>
-                    </div>
-                </template>
-
-                <template x-for="exp in filteredExpenses()" :key="exp.id">
-                    <div class="shin-card p-3.5 transition relative flex flex-col gap-2">
-                        <div class="flex justify-between items-start">
-                            <div class="flex items-center gap-3">
-                                <div class="w-11 h-11 rounded-xl bg-shinYellow text-[#2B2D42] flex items-center justify-center text-xl border-2 border-[#2B2D42] shadow-sm">
-                                    <span x-text="getCategoryIcon(exp.categoryId)"></span>
-                                </div>
-                                <div>
-                                    <h3 class="font-black text-[#2B2D42] text-sm" x-text="exp.title"></h3>
-                                    <div class="text-[11px] text-gray-500 font-bold flex items-center gap-1.5 mt-0.5">
-                                        <span class="bg-gray-100 text-gray-800 font-black px-1.5 py-0.5 rounded-md border border-gray-300 text-[10px]" x-text="formatDate(exp.date)"></span>
-                                        <span>•</span>
-                                        <span>付款人: <strong class="text-shinRed font-black" x-text="getMemberName(exp.payerId)"></strong></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="font-black text-[#2B2D42] text-base" x-text="formatCurrency(exp.amount, exp.currency)"></div>
-                                <div x-show="exp.currency !== tripInfo.baseCurrency" class="text-[10px] text-shinBlue font-black bg-blue-50 px-1.5 py-0.5 rounded-md border border-blue-200 mt-0.5 inline-block">
-                                    ≈ <span x-text="formatCurrency(convertToBase(exp.amount, exp.currency), tripInfo.baseCurrency)"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Splitters Footer -->
-                        <div class="pt-2 border-t-2 border-gray-100 flex justify-between items-center text-xs text-gray-600">
-                            <div class="flex items-center gap-1.5 text-[11px]">
-                                <span class="bg-shinBlue text-white font-black px-1.5 py-0.5 rounded-md border border-[#2B2D42]">平攤</span>
-                                <span class="truncate max-w-[180px] font-bold text-[#2B2D42]" x-text="getSplitterNames(exp.splitters)"></span>
-                            </div>
-                            <div class="flex gap-1">
-                                <button @click="editExpense(exp)" class="w-7 h-7 rounded-lg bg-yellow-100 hover:bg-yellow-200 text-[#2B2D42] border border-[#2B2D42] flex items-center justify-center transition">
-                                    <i class="fa-solid fa-pen text-xs"></i>
-                                </button>
-                                <button @click="deleteExpense(exp.id)" class="w-7 h-7 rounded-lg bg-red-100 hover:bg-red-200 text-shinRed border border-[#2B2D42] flex items-center justify-center transition">
-                                    <i class="fa-solid fa-trash-can text-xs"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <!-- TAB 2: SETTLEMENT -->
-        <div x-show="currentTab === 'settle'" class="space-y-4" x-transition.opacity>
-            
-            <!-- Shin-chan Settlement Banner -->
-            <div class="bg-shinPurple text-white p-4 rounded-2xl shadow-shin-pop relative overflow-hidden border-3 border-[#2B2D42]">
-                <div class="absolute -right-2 -bottom-2 opacity-20 text-6xl select-none">💥</div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">⚡</span>
-                    <h2 class="text-sm font-black tracking-wide text-shinYellow uppercase">動感超人最佳化分帳結算</h2>
-                </div>
-                <p class="text-xs text-purple-100 mt-1 font-bold">美冴不用算帳算出偏頭痛！系統自動歸納最少筆數轉帳方案！</p>
-                <div class="mt-3 pt-2.5 border-t border-white/20 flex justify-between items-center">
-                    <span class="text-xs text-purple-200 font-bold">最佳化交易:</span>
-                    <span class="font-black text-base text-shinYellow" x-text="settlementPlan.length + ' 筆轉帳'"></span>
-                </div>
-            </div>
-
-            <!-- Share to LINE Button -->
-            <button @click="shareToLine()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-black py-3.5 px-4 rounded-2xl shadow-shin-pop flex items-center justify-center gap-2 transition active:translate-x-1 active:translate-y-1 text-sm border-3 border-[#2B2D42]">
-                <i class="fa-brands fa-line text-2xl"></i> 分享結算卡片到 LINE 聊天室 💬
-            </button>
-
-            <!-- Settlement Transfer Cards -->
-            <div class="space-y-3">
-                <h3 class="font-black text-sm text-[#2B2D42] flex items-center gap-2 px-1">
-                    <span>💸</span> 應轉帳結算清單
-                </h3>
-
-                <template x-if="settlementPlan.length === 0">
-                    <div class="shin-card p-8 text-center space-y-2 border-2 border-dashed border-[#2B2D42]">
-                        <div class="text-4xl">🎉</div>
-                        <p class="font-black text-[#2B2D42] text-sm">大家的帳目完美歸零！</p>
-                        <p class="text-xs text-gray-500 font-bold">太棒了～不用像野原廣志一樣還 32 年房貸囉！</p>
-                    </div>
-                </template>
-
-                <template x-for="(plan, idx) in settlementPlan" :key="idx">
-                    <div class="shin-card p-3.5 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <div class="text-center">
-                                <div class="w-10 h-10 rounded-xl bg-shinRed text-white font-black flex items-center justify-center text-sm border-2 border-[#2B2D42] shadow-sm" x-text="getMemberName(plan.from)[0]"></div>
-                                <span class="text-[11px] font-black text-[#2B2D42] mt-1 block" x-text="getMemberName(plan.from)"></span>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <span class="text-[10px] text-shinPurple font-black">轉給</span>
-                                <i class="fa-solid fa-right-long text-shinPurple text-base animate-pulse"></i>
-                            </div>
-                            <div class="text-center">
-                                <div class="w-10 h-10 rounded-xl bg-shinGreen text-white font-black flex items-center justify-center text-sm border-2 border-[#2B2D42] shadow-sm" x-text="getMemberName(plan.to)[0]"></div>
-                                <span class="text-[11px] font-black text-[#2B2D42] mt-1 block" x-text="getMemberName(plan.to)"></span>
-                            </div>
-                        </div>
-
-                        <div class="text-right">
-                            <div class="text-[10px] text-gray-500 font-bold">需支付金額</div>
-                            <div class="font-black text-base text-shinRed" x-text="formatCurrency(plan.amount, tripInfo.baseCurrency)"></div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-
-            <!-- Member Balances Overview -->
-            <div class="shin-card p-4 space-y-3">
-                <h3 class="font-black text-xs text-[#2B2D42] uppercase tracking-wider flex items-center gap-1">
-                    <i class="fa-solid fa-chart-pie"></i> 野原家成員個人收支總覽
-                </h3>
-                <div class="space-y-2">
-                    <template x-for="m in memberBalances" :key="m.id">
-                        <div class="flex justify-between items-center text-xs bg-amber-50 p-2.5 rounded-xl border-2 border-[#2B2D42]">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full border border-[#2B2D42]" :class="m.balance >= 0 ? 'bg-shinGreen' : 'bg-shinRed'"></span>
-                                <span class="font-black text-[#2B2D42]" x-text="m.name"></span>
-                                <span x-show="m.isLineUser" class="bg-emerald-100 text-emerald-800 text-[9px] px-1.5 py-0.2 rounded-md font-black border border-emerald-400">LINE</span>
-                            </div>
-                            <div class="font-black" :class="m.balance >= 0 ? 'text-emerald-700' : 'text-shinRed'">
-                                <span x-text="m.balance >= 0 ? '應收 +' : '應付 '"></span>
-                                <span x-text="formatCurrency(Math.abs(m.balance), tripInfo.baseCurrency)"></span>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 3: MEMBERS & SETTINGS -->
-        <div x-show="currentTab === 'members'" class="space-y-4" x-transition.opacity>
-            
-            <!-- Solo Mode Switch Settings Card -->
-            <div class="shin-card p-4 space-y-3">
-                <h3 class="font-black text-sm text-[#2B2D42] flex items-center gap-1.5">
-                    <span>⚙️</span> 使用模式選擇
-                </h3>
-                <div class="p-3 bg-amber-50 rounded-xl border-2 border-[#2B2D42] flex items-center justify-between">
-                    <div>
-                        <div class="font-black text-xs text-[#2B2D42]" x-text="useGroupSplit ? '目前模式：團體出遊分帳' : '目前模式：個人獨旅記帳'"></div>
-                        <div class="text-[10px] text-gray-500 font-bold" x-text="useGroupSplit ? '適合跟親朋好友出遊平攤金額' : '隱藏平攤與代付欄位，介面更乾淨快速'"></div>
-                    </div>
-                    <button @click="toggleMode()" class="bg-shinRed text-white font-black text-xs px-3 py-1.5 rounded-xl border-2 border-[#2B2D42] shadow-sm">
-                        切換為<span x-text="useGroupSplit ? '個人' : '分帳'"></span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Member Management (Hidden if strictly Personal Mode without group split) -->
-            <div x-show="useGroupSplit" class="shin-card p-4 space-y-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-black text-sm text-[#2B2D42] flex items-center gap-1.5">
-                        <span>👨‍👩‍👧‍👦</span> 出遊夥伴 / 野原家成員
-                    </h3>
-                    <span class="text-xs bg-shinYellow text-[#2B2D42] font-black px-2.5 py-0.5 rounded-md border border-[#2B2D42]" x-text="members.length + ' 人'"></span>
-                </div>
-
-                <!-- Add Member Form -->
-                <div class="flex gap-2">
-                    <input type="text" x-model="newMemberName" placeholder="輸入成員名稱（如：美冴、廣志...）" 
-                           class="flex-1 bg-white border-2 border-[#2B2D42] rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-shinYellow">
-                    <button @click="addMember()" class="bg-[#2B2D42] hover:bg-black text-shinYellow font-black px-4 py-2 rounded-xl text-xs transition border-2 border-[#2B2D42] shadow-sm">
-                        + 新增
-                    </button>
-                </div>
-
-                <!-- LINE Profile quick import -->
-                <template x-if="liffProfile?.displayName && !isMember(liffProfile?.displayName)">
-                    <div class="bg-emerald-50 border-2 border-[#2B2D42] p-3 rounded-2xl flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <img :src="liffProfile?.pictureUrl || 'https://placehold.co/100x100/06C755/white?text=LINE'" class="w-7 h-7 rounded-full border-2 border-[#2B2D42]" @error="$event.target.src='https://placehold.co/100x100/06C755/white?text=LINE'">
-                            <span class="text-xs font-black text-emerald-900" x-text="'連結 LINE: ' + liffProfile?.displayName"></span>
-                        </div>
-                        <button @click="addMember(liffProfile?.displayName, true)" class="bg-line text-white text-[11px] px-3 py-1.5 rounded-xl font-black border-2 border-[#2B2D42]">
-                            一鍵加入
-                        </button>
-                    </div>
-                </template>
-
-                <!-- Member List -->
-                <div class="divide-y-2 divide-gray-100">
-                    <template x-for="m in members" :key="m.id">
-                        <div class="py-2.5 flex justify-between items-center">
-                            <div class="flex items-center gap-2.5">
-                                <div class="w-8 h-8 rounded-xl bg-shinYellow text-[#2B2D42] flex items-center justify-center font-black text-xs border-2 border-[#2B2D42]" x-text="m.name[0]"></div>
-                                <span class="text-xs font-black text-[#2B2D42]" x-text="m.name"></span>
-                                <span x-show="m.isLineUser" class="bg-emerald-100 text-emerald-800 text-[9px] px-1.5 py-0.2 rounded-md font-black border border-emerald-400">LINE 帳號</span>
-                            </div>
-                            <button @click="removeMember(m.id)" class="w-7 h-7 text-gray-400 hover:text-shinRed rounded-lg flex items-center justify-center transition">
-                                <i class="fa-solid fa-xmark text-sm"></i>
-                            </button>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Currency Setting -->
-            <div class="shin-card p-4 space-y-3">
-                <h3 class="font-black text-sm text-[#2B2D42] flex items-center gap-1.5">
-                    <span>💱</span> 外幣與匯率換算
-                </h3>
-                <p class="text-[11px] text-gray-500 font-bold">設定各國貨幣換算成主幣別 (TWD) 的匯率：</p>
-
-                <div class="space-y-2">
-                    <template x-for="(rate, curr) in exchangeRates" :key="curr">
-                        <div class="flex items-center justify-between text-xs bg-amber-50 p-2.5 rounded-xl border-2 border-[#2B2D42]">
-                            <span class="font-black text-shinPurple" x-text="curr"></span>
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-gray-500 font-bold">1 <span x-text="curr"></span> = </span>
-                                <input type="number" step="0.0001" x-model.number="exchangeRates[curr]" @change="saveData()" 
-                                       class="w-20 bg-white border-2 border-[#2B2D42] rounded-lg px-2 py-1 text-right text-xs font-black text-[#2B2D42] focus:outline-none">
-                                <span class="text-gray-700 font-bold" x-text="tripInfo.baseCurrency"></span>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Reset & Data Export -->
-            <div class="shin-card p-4 space-y-3">
-                <h3 class="font-black text-sm text-[#2B2D42] flex items-center gap-1.5">
-                    <span>💾</span> 資料備份與管理
-                </h3>
-                <div class="grid grid-cols-2 gap-2">
-                    <button @click="exportData()" class="bg-blue-100 hover:bg-blue-200 text-shinBlue font-black py-2.5 rounded-xl text-xs transition border-2 border-[#2B2D42] flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-file-export"></i> 匯出備份 JSON
-                    </button>
-                    <button @click="resetTrip()" class="bg-red-100 hover:bg-red-200 text-shinRed font-black py-2.5 rounded-xl text-xs transition border-2 border-[#2B2D42] flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-arrow-rotate-left"></i> 重置所有紀錄
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t-4 border-[#2B2D42] flex justify-around py-2.5 px-2 z-30 safe-area-bottom sm:rounded-b-3xl">
-        <button @click="currentTab = 'expenses'" 
-                :class="currentTab === 'expenses' ? 'text-shinRed font-black scale-105' : 'text-gray-500 font-bold'" 
-                class="flex-1 flex flex-col items-center justify-center transition">
-            <i class="fa-solid fa-receipt text-lg"></i>
-            <span class="text-[10px] mt-1">消費明細</span>
-        </button>
-        <button @click="currentTab = 'settle'" 
-                :class="currentTab === 'settle' ? 'text-shinRed font-black scale-105' : 'text-gray-500 font-bold'" 
-                class="flex-1 flex flex-col items-center justify-center transition relative">
-            <i class="fa-solid fa-bolt text-lg"></i>
-            <span class="text-[10px] mt-1">動感分帳</span>
-            <span x-show="settlementPlan.length > 0" class="absolute top-1 right-6 w-2.5 h-2.5 bg-shinRed rounded-full animate-ping"></span>
-            <span x-show="settlementPlan.length > 0" class="absolute top-1 right-6 w-2.5 h-2.5 bg-shinRed rounded-full border border-[#2B2D42]"></span>
-        </button>
-        <button @click="currentTab = 'members'" 
-                :class="currentTab === 'members' ? 'text-shinRed font-black scale-105' : 'text-gray-500 font-bold'" 
-                class="flex-1 flex flex-col items-center justify-center transition">
-            <i class="fa-solid fa-users text-lg"></i>
-            <span class="text-[10px] mt-1">成員與設定</span>
-        </button>
-    </nav>
-
-    <!-- ADD/EDIT EXPENSE MODAL -->
-    <div x-show="showExpenseModal" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" style="display: none;">
-        <div @click.outside="showExpenseModal = false" class="bg-shinBg w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col overflow-hidden border-4 border-[#2B2D42] shadow-2xl">
-            
-            <!-- Modal Header -->
-            <div class="p-4 border-b-4 border-[#2B2D42] flex justify-between items-center bg-shinYellow">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🖍️</span>
-                    <h3 class="font-black text-[#2B2D42] text-sm" x-text="isEditing ? '修改野原家花費' : '新增野原家花費帳目'"></h3>
-            <!-- Modal Body Fields -->
-            <div class="p-4 overflow-y-auto space-y-4 text-xs">
-                
-                <!-- Title -->
-                <div>
-                    <label class="block font-black text-[#2B2D42] mb-1">消費項目 / 名稱</label>
-                    <input type="text" x-model="formExpense.title" placeholder="例如：巧克比餅乾 🍪、雙葉幼稚園門票..." 
-                           class="w-full bg-white border-2 border-[#2B2D42] rounded-xl p-3 text-sm font-bold focus:outline-none">
-                </div>
-
-                <!-- Amount & Currency -->
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="col-span-2">
-                        <label class="block font-black text-[#2B2D42] mb-1">金額</label>
-                        <input type="number" step="any" x-model.number="formExpense.amount" placeholder="0" 
-                               class="w-full bg-white border-2 border-[#2B2D42] rounded-xl p-3 text-base font-black text-[#2B2D42] focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block font-black text-[#2B2D42] mb-1">幣別</label>
-                        <select x-model="formExpense.currency" class="w-full bg-white border-2 border-[#2B2D42] rounded-xl p-3 text-xs font-black text-[#2B2D42] focus:outline-none">
-                            <template x-for="(rate, curr) in exchangeRates" :key="curr">
-                                <option :value="curr" x-text="curr"></option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Category Selector -->
-                <div>
-                    <label class="block font-black text-[#2B2D42] mb-1.5">消費類別</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <template x-for="cat in categories" :key="cat.id">
-                            <button type="button" @click="formExpense.categoryId = cat.id"
-                                    :class="formExpense.categoryId === cat.id ? 'bg-[#2B2D42] text-shinYellow font-black' : 'bg-white text-gray-700 border-2 border-[#2B2D42] font-bold'"
-                                    class="p-2.5 rounded-xl text-center flex items-center justify-center gap-1.5 transition shadow-sm">
-                                <span class="text-base" x-text="cat.icon"></span>
-                                <span class="text-xs" x-text="cat.name"></span>
-                            </button>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Payer & Splitters (Only display in Group Mode) -->
-                <template x-if="useGroupSplit">
-                    <div class="space-y-4">
-                        <!-- Payer -->
-                        <div>
-                            <label class="block font-black text-[#2B2D42] mb-1">誰先付的錢？ 💸</label>
-                            <select x-model="formExpense.payerId" class="w-full bg-white border-2 border-[#2B2D42] rounded-xl p-3 text-xs font-black text-[#2B2D42] focus:outline-none">
-                                <template x-for="m in members" :key="m.id">
-                                    <option :value="m.id" x-text="m.name"></option>
-                                </template>
-                            </select>
-                        </div>
-
-                        <!-- Splitters -->
-                        <div>
-                            <div class="flex justify-between items-center mb-1.5">
-                                <label class="font-black text-[#2B2D42]">平攤成員 (可多選)</label>
-                                <button type="button" @click="selectAllSplitters()" class="text-[#2B2D42] font-black text-[11px] bg-shinYellow px-2 py-0.5 rounded-md border border-[#2B2D42]">全選夥伴</button>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <template x-for="m in members" :key="m.id">
-                                    <label class="flex items-center gap-2 p-2.5 rounded-xl border-2 border-[#2B2D42] bg-white cursor-pointer hover:bg-amber-100 transition">
-                                        <input type="checkbox" :value="m.id" x-model="formExpense.splitters" class="accent-shinRed w-4 h-4 rounded">
-                                        <span class="font-black text-[#2B2D42] text-xs" x-text="m.name"></span>
-                                    </label>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Date -->
-                <div>
-                    <label class="block font-black text-[#2B2D42] mb-1">日期</label>
-                    <input type="date" x-model="formExpense.date" class="w-full bg-white border-2 border-[#2B2D42] rounded-xl p-2.5 text-xs text-[#2B2D42] font-bold">
-                </div>
-
-            </div>
-
-            <!-- Modal Footer Buttons -->
-            <div class="p-4 border-t-4 border-[#2B2D42] bg-white flex gap-2">
-                <button @click="showExpenseModal = false" class="flex-1 bg-gray-200 text-gray-800 font-black py-3 rounded-2xl hover:bg-gray-300 transition text-xs border-2 border-[#2B2D42]">
-                    取消
-                </button>
-                <button @click="saveExpense()" class="flex-1 bg-shinRed text-white font-black py-3 rounded-2xl hover:bg-red-600 transition shadow-shin-pop border-2 border-[#2B2D42] text-xs">
-                    儲存帳目 💥
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- TRIP SETTINGS MODAL -->
-    <div x-show="showSettings" x-transition.opacity class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
-        <div @click.outside="showSettings = false" class="bg-shinBg w-full max-w-sm rounded-3xl p-5 space-y-4 border-4 border-[#2B2D42] shadow-2xl">
-            <div class="flex items-center gap-2">
-                <span class="text-xl">⚙️</span>
-                <h3 class="font-black text-[#2B2D42] text-base">行程與主要幣別設定</h3>
-            </div>
-            
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-black text-[#2B2D42] mb-1">行程名稱</label>
-                    <input type="text" x-model="tripInfo.name" placeholder="例如：野原家東京 5 日遊 🖍️" class="w-full bg-white border-2 border-[#2B2D42] rounded-xl p-2.5 text-xs font-bold">
-                </div>
-                <div>
-                    <label class="block font-black text-[#2B2D42] mb-1">主要結算幣別</label>
-                    <select x-model="tripInfo.baseCurrency" class="w-full bg-white border-2 border-[#2B2D42] rounded-xl p-2.5 text-xs font-bold">
-                        <option value="TWD">TWD - 新台幣</option>
-                        <option value="JPY">JPY - 日圓</option>
-                        <option value="KRW">KRW - 韓元</option>
-                        <option value="USD">USD - 美元</option>
-                        <option value="EUR">EUR - 歐元</option>
-                    </select>
-                </div>
-            </div>
-
-            <button @click="saveData(); showSettings = false" class="w-full bg-[#2B2D42] text-shinYellow font-black py-3 rounded-2xl text-xs border-2 border-[#2B2D42]">
-                儲存設定 🖍️
-            </button>
-        </div>
-    </div>
-
-</div>
-
-<script>
-function shinTravelApp() {
-    return {
-        // App State
-        currentTab: 'expenses',
-        useGroupSplit: false, // Default to Personal/Solo mode for single user!
-        showExpenseModal: false,
-        showSettings: false,
-        isEditing: false,
-        selectedCategoryFilter: 'ALL',
-        liffProfile: null,
-
-        // Shin-chan Quotes
-        quotes: [
-            "嗨～今天也是小新一個人開心地記錄旅程花費！",
-            "巧克比買再多都不嫌多！🍪",
-            "動感光波！把不必要的開銷通通消滅～💥",
-            "自己旅行最自由啦～不用理會美冴的碎碎唸！",
-            "把每一筆預算都記好，廣志就會給我零用錢了～"
-        ],
-        currentShinQuote: '',
-
-        // Core Trip Info
-        tripInfo: {
-            name: '我的個人旅行記帳本 🖍️',
-            baseCurrency: 'TWD'
-        },
-
-        toggleMode() {
-            this.useGroupSplit = !this.useGroupSplit;
-            this.saveData();
-        },
-
-        getCategoryAnalytics() {
-            const result = this.categories.map(cat => ({
-                id: cat.id,
-                name: cat.name,
-                icon: cat.icon,
-                amount: 0,
-                percentage: 0
-            }));
-
-            const total = this.calculateTotalExpenses();
-
-            this.expenses.forEach(exp => {
-                const baseAmt = this.convertToBase(exp.amount, exp.currency);
-                const item = result.find(c => c.id === exp.categoryId);
-                if (item) {
-                    item.amount += baseAmt;
-                }
-            });
-
-            if (total > 0) {
-                result.forEach(item => {
-                    item.percentage = Math.round((item.amount / total) * 100);
-                });
-            }
-
-            return result;
-        },
-        
-        exchangeRates: {
-            'TWD': 1.0,
-            'JPY': 0.21,
-            'KRW': 0.024,
-            'USD': 32.2,
-            'EUR': 35.0
-        },
-
-        categories: [
-            { id: 'food', name: '巧克比餅乾', icon: '🍪' },
-            { id: 'transport', name: '幼稚園巴士', icon: '🚌' },
-            { id: 'stay', name: '野原家大宅', icon: '⛺' },
-            { id: 'tickets', name: '動感樂園', icon: '🎡' },
-            { id: 'shopping', name: '玩具周邊', icon: '🛍️' },
-            { id: 'other', name: '其他雜項', icon: '💡' }
-        ],
-
-        members: [
-            { id: 'm1', name: '野原小新', isLineUser: false },
-            { id: 'm2', name: '野原美冴', isLineUser: false },
-            { id: 'm3', name: '野原廣志', isLineUser: false }
-        ],
-
-        expenses: [],
-        settlementPlan: [],
-        memberBalances: [],
-
-        // Form Model
-        newMemberName: '',
-        formExpense: {
-            id: null,
-            title: '',
-            amount: null,
-            currency: 'JPY',
-            categoryId: 'food',
-            payerId: '',
-            splitters: [],
-            date: new Date().toISOString().split('T')[0]
-        },
-
-        initApp() {
-            // Set random quote
-            this.currentShinQuote = this.quotes[Math.floor(Math.random() * this.quotes.length)];
-
-            // Load saved state from LocalStorage
-            const saved = localStorage.getItem('SHINCHAN_SPLITTER_DATA');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    this.tripInfo = parsed.tripInfo || this.tripInfo;
-                    this.exchangeRates = parsed.exchangeRates || this.exchangeRates;
-                    this.members = parsed.members || this.members;
-                    this.expenses = parsed.expenses || [];
-                    this.useGroupSplit = parsed.useGroupSplit !== undefined ? parsed.useGroupSplit : false;
-                } catch (e) {
-                    console.error('Failed to parse saved data', e);
-                }
-            } else {
-                // Mock initial data for solo usage
-                this.expenses = [
-                    {
-                        id: 'e1',
-                        title: '巧克比餅乾 10 盒 🍪',
-                        amount: 1800,
-                        currency: 'JPY',
-                        categoryId: 'food',
-                        payerId: 'm1',
-                        splitters: ['m1'],
-                        date: new Date().toISOString().split('T')[0]
-                    },
-                    {
-                        id: 'e2',
-                        title: '動感超人限量公仔 🦸‍♂️',
-                        amount: 3500,
-                        currency: 'JPY',
-                        categoryId: 'shopping',
-                        payerId: 'm1',
-                        splitters: ['m1'],
-                        date: new Date().toISOString().split('T')[0]
-                    }
-                ];
-            }
-
-            // Initialize LINE LIFF
-            this.initLiff();
-            this.recalculateSettlement();
-        },
-
-        initLiff() {
-            // Safe fallback if LIFF SDK is loaded
-            if (typeof liff !== 'undefined') {
-                // Check if liffId is set or handle uninitialized environment gracefully
-                try {
-                    // You can replace 'YOUR_LIFF_ID' with your actual LIFF ID when deploying
-                    const liffId = 'YOUR_LIFF_ID';
-                    if (liffId && liffId !== 'YOUR_LIFF_ID') {
-                        liff.init({ liffId: liffId })
-                            .then(() => {
-                                if (liff.isLoggedIn()) {
-                                    liff.getProfile().then(profile => {
-                                        this.liffProfile = profile;
-                                    }).catch(err => console.error('LIFF getProfile error:', err));
-                                }
-                            })
-                            .catch(err => console.warn('LIFF initialization warning:', err));
-                    } else {
-                        console.log('LIFF SDK ready (Running without configured LIFF ID).');
-                    }
-                } catch (err) {
-                    console.warn('LIFF init skipped:', err);
-                }
-            }
-        },
-
-        saveData() {
-            const dataToSave = {
-                tripInfo: this.tripInfo,
-                exchangeRates: this.exchangeRates,
-                members: this.members,
-                expenses: this.expenses,
-                useGroupSplit: this.useGroupSplit
-            };
-            localStorage.setItem('SHINCHAN_SPLITTER_DATA', JSON.stringify(dataToSave));
-            this.recalculateSettlement();
-        },
-
-        convertToBase(amount, currency) {
-            const rate = this.exchangeRates[currency] || 1;
-            return Math.round(amount * rate);
-        },
-
-        calculateTotalExpenses() {
-            return this.expenses.reduce((sum, exp) => sum + this.convertToBase(exp.amount, exp.currency), 0);
-        },
-
-        formatCurrency(amount, currency) {
-            const symbols = { 'TWD': 'NT$', 'JPY': '¥', 'USD': '$', 'KRW': '₩', 'EUR': '€' };
-            const sym = symbols[currency] || currency + ' ';
-            return sym + ' ' + Math.round(amount).toLocaleString();
-        },
-
-        formatDate(dateStr) {
-            if (!dateStr) return '';
-            const d = new Date(dateStr);
-            return (d.getMonth() + 1) + '/' + d.getDate();
-        },
-
-        getCategoryIcon(catId) {
-            const c = this.categories.find(item => item.id === catId);
-            return c ? c.icon : '💡';
-        },
-
-        getMemberName(id) {
-            const m = this.members.find(item => item.id === id);
-            return m ? m.name : '未知';
-        },
-
-        isMember(name) {
-            if (!name) return false;
-            return this.members.some(m => m.name === name);
-        },
-
-        getSplitterNames(splitters) {
-            if (!splitters || splitters.length === 0) return '無人平攤';
-            if (splitters.length === this.members.length) return '全體夥伴平攤';
-            return splitters.map(id => this.getMemberName(id)).join(', ');
-        },
-
-        filteredExpenses() {
-            if (this.selectedCategoryFilter === 'ALL') return this.expenses;
-            return this.expenses.filter(e => e.categoryId === this.selectedCategoryFilter);
-        },
-
-        addMember(name = null, isLine = false) {
-            const targetName = name || this.newMemberName.trim();
-            if (!targetName) return;
-            
-            this.members.push({
-                id: 'm_' + Date.now(),
-                name: targetName,
-                isLineUser: isLine
-            });
-
-            this.newMemberName = '';
-            this.saveData();
-        },
-
-        removeMember(id) {
-            if (this.members.length <= 1) {
-                alert('行程中至少需要有一位夥伴唷！');
-                return;
-            }
-            this.members = this.members.filter(m => m.id !== id);
-            this.saveData();
-        },
-
-        openExpenseModal() {
-            this.isEditing = false;
-            this.formExpense = {
-                id: null,
-                title: '',
-                amount: null,
-                currency: this.tripInfo.baseCurrency === 'TWD' ? 'JPY' : this.tripInfo.baseCurrency,
-                categoryId: 'food',
-                payerId: this.members[0] ? this.members[0].id : '',
-                splitters: this.members.map(m => m.id),
-                date: new Date().toISOString().split('T')[0]
-            };
-            this.showExpenseModal = true;
-        },
-
-        selectAllSplitters() {
-            this.formExpense.splitters = this.members.map(m => m.id);
-        },
-
-        editExpense(exp) {
-            this.isEditing = true;
-            this.formExpense = JSON.parse(JSON.stringify(exp));
-            this.showExpenseModal = true;
-        },
-
-        saveExpense() {
-            if (!this.formExpense.title || !this.formExpense.amount || this.formExpense.amount <= 0) {
-                alert('請填寫有效的項目名稱與金額唷！');
-                return;
-            }
-
-            if (this.formExpense.splitters.length === 0) {
-                alert('請至少選擇一位平攤夥伴！');
-                return;
-            }
-
-            if (this.isEditing) {
-                const idx = this.expenses.findIndex(e => e.id === this.formExpense.id);
-                if (idx !== -1) {
-                    this.expenses[idx] = { ...this.formExpense };
-                }
-            } else {
-                this.expenses.unshift({
-                    ...this.formExpense,
-                    id: 'exp_' + Date.now()
-                });
-            }
-
-            this.showExpenseModal = false;
-            this.saveData();
-        },
-
-        deleteExpense(id) {
-            this.expenses = this.expenses.filter(e => e.id !== id);
-            this.saveData();
-        },
-
-        recalculateSettlement() {
-            const balances = {};
-            this.members.forEach(m => balances[m.id] = 0);
-
-            this.expenses.forEach(exp => {
-                const baseAmt = this.convertToBase(exp.amount, exp.currency);
-                const payer = exp.payerId;
-                const splitters = exp.splitters || [];
-
-                if (splitters.length > 0 && baseAmt > 0) {
-                    const share = baseAmt / splitters.length;
-                    
-                    if (balances[payer] !== undefined) {
-                        balances[payer] += baseAmt;
-                    }
-
-                    splitters.forEach(sId => {
-                        if (balances[sId] !== undefined) {
-                            balances[sId] -= share;
-                        }
-                    });
-                }
-            });
-
-            this.memberBalances = this.members.map(m => ({
-                id: m.id,
-                name: m.name,
-                isLineUser: m.isLineUser,
-                balance: balances[m.id] || 0
-            }));
-
-            // Optimal transfer strategy
-            const debtors = [];
-            const creditors = [];
-
-            Object.keys(balances).forEach(id => {
-                const val = balances[id];
-                if (val < -0.01) {
-                    debtors.push({ id, amount: -val });
-                } else if (val > 0.01) {
-                    creditors.push({ id, amount: val });
-                }
-            });
-
-            const plan = [];
-            let i = 0, j = 0;
-
-            while (i < debtors.length && j < creditors.length) {
-                const debtor = debtors[i];
-                const creditor = creditors[j];
-
-                const amount = Math.min(debtor.amount, creditor.amount);
-
-                plan.push({
-                    from: debtor.id,
-                    to: creditor.id,
-                    amount: Math.round(amount)
-                });
-
-                debtor.amount -= amount;
-                creditor.amount -= amount;
-
-                if (debtor.amount < 0.01) i++;
-                if (creditor.amount < 0.01) j++;
-            }
-
-            this.settlementPlan = plan;
-        },
-
-        shareToLine() {
-            let msg = `🖍️【${this.tripInfo.name}】野原家動感分帳結算 💥\n`;
-            msg += `---------------------------\n`;
-            msg += `💰 總共累積金額：${this.formatCurrency(this.calculateTotalExpenses(), this.tripInfo.baseCurrency)}\n\n`;
-
-            if (this.settlementPlan.length === 0) {
-                msg += `🎉 帳目完美歸零，大家不用還房貸囉！`;
-            } else {
-                msg += `⚡ 最佳化劃算轉帳方案：\n`;
-                this.settlementPlan.forEach((p, idx) => {
-                    const debtor = this.getMemberName(p.from);
-                    const creditor = this.getMemberName(p.to);
-                    const amt = this.formatCurrency(p.amount, this.tripInfo.baseCurrency);
-                    msg += `${idx + 1}. ${debtor} ➔ 轉給 ${creditor}：${amt}\n`;
-                });
-            }
-
-            msg += `\n"動感光波！嗶嗶嗶嗶嗶～💥" 感謝大家出遊相伴！`;
-
-            if (typeof liff !== 'undefined' && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')) {
-                liff.shareTargetPicker([
-                    {
-                        type: "text",
-                        text: msg
-                    }
-                ]).then(() => {
-                    console.log("Shared successfully via LIFF!");
-                }).catch((err) => {
-                    console.error("Share target picker fallback:", err);
-                    this.copyToClipboard(msg);
-                });
-            } else {
-                this.copyToClipboard(msg);
-            }
-        },
-
-        copyToClipboard(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                alert('🖍️ 結算卡片已複製到剪貼簿！可以直接貼到 LINE 聊天室中分享囉～\n\n' + text);
-            } catch (err) {
-                alert('複製失敗，請手動複製');
-            }
-            document.body.removeChild(textarea);
-        },
-
-        exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem('SHINCHAN_SPLITTER_DATA'));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `${this.tripInfo.name}_野原家備份.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        },
-
-        resetTrip() {
-            if (confirm('確定要清空所有野原家紀錄並重新開始嗎？')) {
-                localStorage.removeItem('SHINCHAN_SPLITTER_DATA');
-                location.reload();
-            }
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>野原家出遊記帳小幫手</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap');
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background-color: #FEF08A;
     }
-}
-</script>
+    .neo-card {
+      border: 3px solid #1E293B;
+      box-shadow: 4px 4px 0px #1E293B;
+      border-radius: 1rem;
+    }
+    .neo-btn {
+      border: 2px solid #1E293B;
+      box-shadow: 3px 3px 0px #1E293B;
+      transition: all 0.1s ease;
+    }
+    .neo-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #1E293B;
+    }
+    .tab-btn.active {
+      background-color: #FF3B30;
+      color: white;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 max-w-md mx-auto min-h-screen pb-12">
 
+  <!-- Header -->
+  <div class="neo-card bg-red-500 text-white p-4 mb-4 text-center relative overflow-hidden">
+    <div class="flex items-center justify-center gap-3">
+      <!-- 蠟筆小新 SVG -->
+      <svg class="w-12 h-12" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="#FFCC00" stroke="#1E293B" stroke-width="4"/>
+        <path d="M 20 40 Q 35 20 50 40" stroke="#1E293B" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M 50 40 Q 65 20 80 40" stroke="#1E293B" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <circle cx="35" cy="52" r="5" fill="#1E293B"/>
+        <circle cx="65" cy="52" r="5" fill="#1E293B"/>
+        <ellipse cx="25" cy="62" rx="6" ry="4" fill="#FF8888"/>
+        <ellipse cx="75" cy="62" rx="6" ry="4" fill="#FF8888"/>
+        <path d="M 40 70 Q 50 82 60 70" stroke="#1E293B" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="text-left">
+        <h1 class="text-xl font-black tracking-wide">野原家出遊記帳</h1>
+        <p class="text-xs bg-yellow-300 text-black px-2 py-0.5 rounded-full font-bold inline-block mt-1">動感光波分帳版 ✨</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分頁按鈕 -->
+  <div class="flex gap-2 mb-4">
+    <button id="tab1" onclick="switchTab(1)" class="tab-btn active flex-1 neo-btn py-2 font-bold rounded-xl bg-white text-slate-800">📝 新增記帳</button>
+    <button id="tab2" onclick="switchTab(2)" class="tab-btn flex-1 neo-btn py-2 font-bold rounded-xl bg-white text-slate-800">📋 帳目明細</button>
+    <button id="tab3" onclick="switchTab(3)" class="tab-btn flex-1 neo-btn py-2 font-bold rounded-xl bg-white text-slate-800">⚡ 快速結算</button>
+  </div>
+
+  <!-- 頁籤 1: 新增記帳 -->
+  <div id="page1" class="neo-card bg-white p-4 mb-4">
+    <h2 class="font-black text-lg mb-3 flex items-center gap-2">
+      <span>🖍️</span> 新增消費項目
+    </h2>
+
+    <div class="space-y-3 text-sm font-bold">
+      <div>
+        <label class="block text-slate-600 mb-1">消費名稱</label>
+        <input type="text" id="itemTitle" placeholder="例：巧克比餅乾、雙葉車票" class="w-full border-2 border-slate-800 rounded-lg p-2 bg-slate-50 focus:outline-none">
+      </div>
+
+      <div class="flex gap-2">
+        <div class="flex-1">
+          <label class="block text-slate-600 mb-1">金額</label>
+          <input type="number" id="itemAmount" placeholder="0" class="w-full border-2 border-slate-800 rounded-lg p-2 bg-slate-50 focus:outline-none">
+        </div>
+        <div class="w-1/3">
+          <label class="block text-slate-600 mb-1">幣別</label>
+          <select id="itemCurrency" class="w-full border-2 border-slate-800 rounded-lg p-2 bg-slate-50 focus:outline-none">
+            <option value="TWD">TWD (NT$)</option>
+            <option value="JPY">JPY (￥)</option>
+            <option value="KRW">KRW (₩)</option>
+            <option value="USD">USD ($)</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-slate-600 mb-1">類別</label>
+        <select id="itemCategory" class="w-full border-2 border-slate-800 rounded-lg p-2 bg-slate-50 focus:outline-none">
+          <option value="🍔 餐飲美食">🍔 餐飲美食</option>
+          <option value="🚌 交通車票">🚌 交通車票</option>
+          <option value="🏠 住宿飯店">🏠 住宿飯店</option>
+          <option value="🎟️ 景點門票">🎟️ 景點門票</option>
+          <option value="🛍️ 購物戰利品">🛍️ 購物戰利品</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-slate-600 mb-1">誰先付錢的？</label>
+        <select id="itemPayer" class="w-full border-2 border-slate-800 rounded-lg p-2 bg-slate-50 focus:outline-none">
+          <!-- 動態載入成員 -->
+        </select>
+      </div>
+
+      <button onclick="addExpense()" class="w-full neo-btn bg-yellow-400 font-black py-3 rounded-xl text-base mt-2">
+        ✨ 記下一筆帳！
+      </button>
+    </div>
+  </div>
+
+  <!-- 成員管理卡片 -->
+  <div class="neo-card bg-white p-4 mb-4">
+    <h2 class="font-black text-base mb-2 flex justify-between items-center">
+      <span>👥 出遊小夥伴</span>
+      <span id="memberCount" class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">3 人</span>
+    </h2>
+    <div id="memberList" class="flex flex-wrap gap-1.5 mb-3">
+      <!-- 動態載入成員標籤 -->
+    </div>
+    <div class="flex gap-2">
+      <input type="text" id="newMemberName" placeholder="新增人名（如：廣志）" class="flex-1 border-2 border-slate-800 rounded-lg p-1.5 text-sm bg-slate-50">
+      <button onclick="addMember()" class="neo-btn bg-sky-300 font-bold px-3 py-1.5 rounded-lg text-sm">新增</button>
+    </div>
+  </div>
+
+  <!-- 頁籤 2: 明細 -->
+  <div id="page2" class="neo-card bg-white p-4 mb-4 hidden">
+    <h2 class="font-black text-lg mb-3">📋 消費明細記錄</h2>
+    <div id="expenseList" class="space-y-2">
+      <!-- 動態載入明細 -->
+    </div>
+  </div>
+
+  <!-- 頁籤 3: 結算 -->
+  <div id="page3" class="neo-card bg-white p-4 mb-4 hidden">
+    <h2 class="font-black text-lg mb-3">⚡ 智能分帳結算</h2>
+    <div id="settlementList" class="space-y-2 mb-4">
+      <!-- 動態載入結算 -->
+    </div>
+    <button onclick="copySettlement()" class="w-full neo-btn bg-green-400 font-black py-3 rounded-xl text-sm">
+      📲 複製結算文字（傳到 LINE 群組）
+    </button>
+  </div>
+
+  <script>
+    // 匯率換算表 (相對於 TWD)
+    const RATES = { TWD: 1, JPY: 0.21, KRW: 0.024, USD: 32.2 };
+    
+    // 初始化預設資料
+    let members = JSON.parse(localStorage.getItem('shin_members')) || ['小新', '美冴', '廣志'];
+    let expenses = JSON.parse(localStorage.getItem('shin_expenses')) || [];
+
+    // 初始化 App
+    function init() {
+      renderMembers();
+      renderExpenses();
+      renderSettlement();
+    }
+
+    // 切換頁籤
+    function switchTab(num) {
+      [1, 2, 3].forEach(n => {
+        document.getElementById(`page${n}`).classList.add('hidden');
+        document.getElementById(`tab${n}`).classList.remove('active');
+      });
+      document.getElementById(`page${num}`).classList.remove('hidden');
+      document.getElementById(`tab${num}`).classList.add('active');
+    }
+
+    // 渲染成員
+    function renderMembers() {
+      const listEl = document.getElementById('memberList');
+      const selectEl = document.getElementById('itemPayer');
+      const countEl = document.getElementById('memberCount');
+      
+      countEl.innerText = `${members.length} 人`;
+      listEl.innerHTML = members.map((m, idx) => `
+        <span class="bg-yellow-100 border border-slate-800 text-slate-800 font-bold text-xs px-2 py-1 rounded-md flex items-center gap-1">
+          ${m}
+          ${members.length > 1 ? `<button onclick="removeMember(${idx})" class="text-red-500 font-bold ml-1">✕</button>` : ''}
+        </span>
+      `).join('');
+
+      selectEl.innerHTML = members.map(m => `<option value="${m}">${m}</option>`).join('');
+    }
+
+    // 新增成員
+    function addMember() {
+      const input = document.getElementById('newMemberName');
+      const name = input.value.trim();
+      if (name && !members.includes(name)) {
+        members.push(name);
+        input.value = '';
+        saveData();
+        renderMembers();
+        renderSettlement();
+      }
+    }
+
+    // 刪除成員
+    function removeMember(idx) {
+      members.splice(idx, 1);
+      saveData();
+      renderMembers();
+      renderSettlement();
+    }
+
+    // 新增記帳
+    function addExpense() {
+      const title = document.getElementById('itemTitle').value.trim();
+      const amount = parseFloat(document.getElementById('itemAmount').value);
+      const currency = document.getElementById('itemCurrency').value;
+      const category = document.getElementById('itemCategory').value;
+      const payer = document.getElementById('itemPayer').value;
+
+      if (!title || isNaN(amount) || amount <= 0) {
+        alert('請輸入有效的消費名稱與金額！');
+        return;
+      }
+
+      const newExpense = {
+        id: Date.now(),
+        title,
+        amount,
+        currency,
+        category,
+        payer,
+        amountTWD: Math.round(amount * RATES[currency])
+      };
+
+      expenses.unshift(newExpense);
+      saveData();
+      
+      // 清空輸入框
+      document.getElementById('itemTitle').value = '';
+      document.getElementById('itemAmount').value = '';
+
+      renderExpenses();
+      renderSettlement();
+      alert('✅ 記帳成功！動感光波逼逼逼～');
+    }
+
+    // 刪除記帳
+    function deleteExpense(id) {
+      expenses = expenses.filter(e => e.id !== id);
+      saveData();
+      renderExpenses();
+      renderSettlement();
+    }
+
+    // 渲染帳目明細
+    function renderExpenses() {
+      const listEl = document.getElementById('expenseList');
+      if (expenses.length === 0) {
+        listEl.innerHTML = `<p class="text-center text-slate-400 py-6 text-sm font-bold">目前還沒有記帳紀錄喔！</p>`;
+        return;
+      }
+
+      listEl.innerHTML = expenses.map(e => `
+        <div class="border-2 border-slate-800 rounded-xl p-3 bg-slate-50 flex justify-between items-center">
+          <div>
+            <div class="font-black text-sm text-slate-800">${e.category.split(' ')[0]} ${e.title}</div>
+            <div class="text-xs text-slate-500 font-bold">${e.payer} 付款 • ${e.currency} ${e.amount}</div>
+          </div>
+          <div class="text-right flex items-center gap-2">
+            <div>
+              <div class="font-black text-red-500 text-sm">NT$ ${e.amountTWD}</div>
+            </div>
+            <button onclick="deleteExpense(${e.id})" class="text-slate-400 hover:text-red-500 font-bold px-1">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 計算並渲染分帳結算
+    function renderSettlement() {
+      const listEl = document.getElementById('settlementList');
+      if (expenses.length === 0 || members.length === 0) {
+        listEl.innerHTML = `<p class="text-center text-slate-400 py-6 text-sm font-bold">新增記帳後會自動計算結算！</p>`;
+        return;
+      }
+
+      const totalTWD = expenses.reduce((sum, e) => sum + e.amountTWD, 0);
+      const avgTWD = Math.round(totalTWD / members.length);
+
+      // 計算每個人付出金額
+      let paid = {};
+      members.forEach(m => paid[m] = 0);
+      expenses.forEach(e => {
+        if (paid[e.payer] !== undefined) paid[e.payer] += e.amountTWD;
+      });
+
+      // 計算收支平衡
+      let balances = {};
+      members.forEach(m => balances[m] = paid[m] - avgTWD);
+
+      // 拆分債權與債務
+      let debtors = [], creditors = [];
+      for (let m in balances) {
+        if (balances[m] < -1) debtors.push({ name: m, amount: -balances[m] });
+        if (balances[m] > 1) creditors.push({ name: m, amount: balances[m] });
+      }
+
+      let transactions = [];
+      let i = 0, j = 0;
+
+      while (i < debtors.length && j < creditors.length) {
+        let pay = Math.min(debtors[i].amount, creditors[j].amount);
+        transactions.push({
+          from: debtors[i].name,
+          to: creditors[j].name,
+          amount: Math.round(pay)
+        });
+
+        debtors[i].amount -= pay;
+        creditors[j].amount -= pay;
+
+        if (debtors[i].amount < 1) i++;
+        if (creditors[j].amount < 1) j++;
+      }
+
+      let html = `
+        <div class="bg-yellow-100 border-2 border-slate-800 rounded-xl p-3 mb-3 text-sm font-bold">
+          <div>總消費：<span class="text-red-500 font-black">NT$ ${totalTWD}</span></div>
+          <div>每人平均：<span class="text-blue-600 font-black">NT$ ${avgTWD}</span></div>
+        </div>
+      `;
+
+      if (transactions.length === 0) {
+        html += `<p class="text-center text-green-600 font-bold py-2">大家金額剛剛好，不需要給錢！</p>`;
+      } else {
+        html += transactions.map(t => `
+          <div class="border-2 border-slate-800 rounded-xl p-2.5 bg-slate-50 text-sm font-bold flex justify-between items-center">
+            <span>🔴 ${t.from} ➔ 🟢 ${t.to}</span>
+            <span class="text-red-500 font-black">NT$ ${t.amount}</span>
+          </div>
+        `).join('');
+      }
+
+      listEl.innerHTML = html;
+    }
+
+    // 複製結算報告
+    function copySettlement() {
+      const totalTWD = expenses.reduce((sum, e) => sum + e.amountTWD, 0);
+      const avgTWD = Math.round(totalTWD / (members.length || 1));
+
+      let text = `🖍️ 【野原家出遊分帳報告】\n`;
+      text += `💰 總消費：NT$ ${totalTWD}\n`;
+      text += `👥 每人平均：NT$ ${avgTWD}\n`;
+      text += `-------------------\n`;
+      text += `⚡ 結算建議：\n`;
+
+      const listItems = document.querySelectorAll('#settlementList div.bg-slate-50');
+      if (listItems.length === 0) {
+        text += `大家都結清囉！金額剛剛好！\n`;
+      } else {
+        listItems.forEach(item => {
+          text += `${item.innerText.replace('\n', ' ')}\n`;
+        });
+      }
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert('📋 結算報告已複製到剪貼簿！可直接貼到 LINE 群組！');
+      }).catch(() => {
+        alert('複製失敗，請手動選取文字複製。');
+      });
+    }
+
+    // 儲存資料到 LocalStorage
+    function saveData() {
+      localStorage.setItem('shin_members', JSON.stringify(members));
+      localStorage.setItem('shin_expenses', JSON.stringify(expenses));
+    }
+
+    // 頁面載入執行
+    window.onload = init;
+  </script>
 </body>
 </html>
